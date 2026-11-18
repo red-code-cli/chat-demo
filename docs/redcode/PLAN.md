@@ -45,6 +45,9 @@ Scope decisions (recorded during Phase 1):
   never attach it automatically, which removes CSRF risk; no cookie/session store is needed.
 - Routes are `/health` (public) and `/api/v1/*` (authenticated). `/api/v1/events` is the SSE
   bridge; there is no generic OpenCode proxy route.
+- Embedded `edit` and `bash` permissions are `"allow"` so tools run without an approval
+  prompt, per the local deployment request. Remote mode warns when its policy is not `allow`.
+  Keep `WORKSPACE_ROOT` limited to a directory the agent is allowed to modify.
 
 - [x] Add `server/` (Hono on Node 22+) with a clean `src/`-independent build and scripts
       (`dev:server`, `build:server`, `test:server`, `start`), without changing existing app
