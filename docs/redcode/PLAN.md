@@ -39,25 +39,36 @@ Goal: know exactly what exists today and put a test net under it. No product cha
 
 Goal: a real server next to the SPA; browser no longer talks to the model provider directly.
 
-- [ ] Add `server/` (Hono on Node 22+) with a clean `src/`-independent build and scripts
-      (`dev:server`, `build:server`, `start`), without changing existing app scripts' meaning.
-- [ ] Runtime config (env) for port, OpenCode host URL, allowed origins, session/auth secret;
-      no secrets in the bundle.
-- [ ] OpenCode host: stable `@opencode-ai/sdk` client, health check, graceful shutdown,
-      single host per process, structured logs.
-- [ ] Auth: signed HTTP-only session cookie (or equivalent) gating `/api/*`; CSRF-safe
-      mutations; CORS restricted to the app origin.
-- [ ] API skeleton: `/api/health`, `/api/config`, `/api/opencode/*` proxy + SSE/event
-      passthrough; error envelope shared by all routes.
+Scope decisions (recorded during Phase 1):
+- `src/` stays untouched in this phase, so frontend integration is deferred to Phase 2.
+- Auth is an explicit `Authorization: Bearer <APP_AUTH_TOKEN>` header, not a cookie. Browsers
+  never attach it automatically, which removes CSRF risk; no cookie/session store is needed.
+- Routes are `/health` (public) and `/api/v1/*` (authenticated). `/api/v1/events` is the SSE
+  bridge; there is no generic OpenCode proxy route.
+
+- [x] Add `server/` (Hono on Node 22+) with a clean `src/`-independent build and scripts
+      (`dev:server`, `build:server`, `test:server`, `start`), without changing existing app
+      scripts' meaning.
+- [x] Runtime config (env) for port, OpenCode mode/base URL, allowed origins, auth token, and
+      workspace root; validation fails fast; no secrets in the bundle.
+- [x] OpenCode host: stable `@opencode-ai/sdk` client, health check, graceful shutdown,
+      single host per process, structured redacted logs, one embedded restart after a crash.
+- [x] Auth: constant-time bearer token gating `/api/*`; CORS restricted to `ALLOWED_ORIGINS`;
+      mutations require the same header, so they are CSRF-safe without cookies.
+- [x] API skeleton: `/health`, `/api/v1/meta`, `/api/v1/sessions*`, `/api/v1/events` SSE bridge;
+      shared error envelope with `code`, `message`, and `requestId`.
 - [ ] Frontend integration behind a build/config flag; existing DeepSeek direct mode still
-      works until Phase 2 swaps the chat transport.
-- [ ] Server tests (Hono `app.request`) plus an e2e smoke for boot + health; no network mocks
-      leaking to real providers.
-- [ ] Docs: runbook (env vars, start order, ports), update `AUDIT.md` deployment notes.
+      works until Phase 2 swaps the chat transport. **Deferred to Phase 2 because Phase 1 must
+      not change `src/`.**
+- [x] Server tests (Vitest route/unit tests with a mocked gateway) plus a manual smoke script for
+      real OpenCode; no network mocks leaking to real providers and no smoke in CI.
+- [x] Docs: `server/README.md` runbook (env vars, start order, ports, troubleshooting),
+      `docs/redcode/SDK-NOTES.md`, and Phase 1 deployment notes in `AUDIT.md`.
 
 **Definition of done**
-- `pnpm type`, `lint`, `build`, `test:e2e`, `test:visual` pass; server typecheck/tests pass.
+- `pnpm type`, `lint`, `build`, `test:e2e`, `test:visual` pass; server typecheck/build/tests pass.
 - Existing UI and all locked UX unchanged; visual baselines unchanged (or approved diffs).
+- `git diff main --stat -- src` is empty.
 - **Animations:** no new flicker or layout shift during auth/bootstrap; loading states reuse
   existing styles and respect `prefers-reduced-motion`; no shipped animation is altered.
 

@@ -337,3 +337,42 @@ Minor findings (recorded only, not changed):
 - The first `pnpm type` run in this environment failed with a transient
   `Cannot find module '@rspack/cli'` while `pnpm install` was still finishing; a clean re-run passes.
   This is an environment race, not a repo defect.
+
+---
+
+## 8. Phase 1 backend deployment notes
+
+Phase 1 adds `server/` without changing `src/`, the frontend bundle, or the locked UX.
+
+- **Topology.** The public listener is Hono (`HOST:PORT`, default `127.0.0.1:8787`).
+  Embedded OpenCode binds to `127.0.0.1` on a random port with a per-process random basic-auth
+  password. Remote mode uses `OPENCODE_BASE_URL` and never exposes that URL to the browser.
+- **Auth.** `/health` is public. Every `/api/*` route requires
+  `Authorization: Bearer <APP_AUTH_TOKEN>`. The token is compared as a SHA-256 digest with
+  `timingSafeEqual`, so token length is not leaked. There are no cookies and no CSRF surface.
+- **CORS.** Only exact origins in `ALLOWED_ORIGINS` are accepted. Wildcards, paths, and unknown
+  origins are rejected before routing. Preflight is limited to `GET`, `POST`, `DELETE`, and
+  `OPTIONS`.
+- **Secrets.** `APP_AUTH_TOKEN`, `OPENCODE_PROVIDER_API_KEY`, and
+  `OPENCODE_SERVER_PASSWORD` stay in `server/.env` (git-ignored) or the process environment.
+  They are never returned by `/health` or `/api/v1/meta` and never logged. `client.config.get()`
+  is used only to check the remote permission policy; the full config is not returned.
+- **Workspace.** Every `?directory=` input must resolve through `realpath` to an existing folder
+  inside `WORKSPACE_ROOT`. Relative traversal, absolute paths outside the root, symlink escapes,
+  and files are rejected with `INVALID_DIRECTORY`.
+- **Persistence isolation.** Embedded OpenCode uses dedicated
+  `XDG_DATA_HOME`/`XDG_CONFIG_HOME`/`XDG_STATE_HOME` directories under `OPENCODE_DATA_DIR`
+  (default `server/.data/opencode`). This avoids the v1/v2 database collision and prevents
+  inheriting global MCP credentials.
+- **Operations.** `SIGTERM`/`SIGINT` closes SSE streams, stops accepting HTTP requests, and
+  stops OpenCode within a 10-second force-exit window. The embedded gateway probes
+  `client.path.get()` every 15 seconds and attempts exactly one restart after a crash.
+  `/health` returns `503` and `status: "degraded"` when OpenCode is unreachable.
+- **Integration.** Verified against the pinned `opencode-ai@1.19.6` CLI: embedded mode started,
+  reported healthy, created a session, served `/api/v1/meta`, and exited cleanly on `SIGTERM`;
+  remote mode served `/health`, rejected missing auth, listed/created/deleted sessions, and
+  delivered a real `server.connected` SSE event plus heartbeat. A real prompt run needs
+  `OPENCODE_PROVIDER_API_KEY` and is covered by the manual smoke script, not CI.
+- **Follow-up for Phase 2.** The SPA still talks to DeepSeek directly. Wiring it to this API
+  (window fetch streaming, not `EventSource`, because `EventSource` cannot set the bearer
+  header) is Phase 2 scope.
