@@ -9,3 +9,6 @@ build/
 .env.*
 !.env.example
 tmp/
+test-results/
+playwright-report/
+blob-report/
