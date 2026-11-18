@@ -27,7 +27,7 @@ export class RemoteOpencodeGateway extends SdkOpencodeGateway {
       assertSdkOk(result, "read remote config");
       const permission = permissionPolicy(result.data);
       if (!permission.edit || !permission.bash) {
-        this.logger.warn("remote opencode permissions are not 'ask'", {
+        this.logger.warn("remote opencode permissions are not 'allow'", {
           edit: permission.edit,
           bash: permission.bash,
         });
@@ -65,18 +65,18 @@ function permissionPolicy(config: unknown): { edit: boolean; bash: boolean } {
   }
 
   return {
-    edit: isAsk(config.permission.edit),
-    bash: isAsk(config.permission.bash),
+    edit: isAllow(config.permission.edit),
+    bash: isAllow(config.permission.bash),
   };
 }
 
-function isAsk(value: unknown): boolean {
-  if (value === "ask") {
+function isAllow(value: unknown): boolean {
+  if (value === "allow") {
     return true;
   }
   if (isRecord(value)) {
     const values = Object.values(value);
-    return values.length > 0 && values.every((entry) => entry === "ask");
+    return values.length > 0 && values.every((entry) => entry === "allow");
   }
   return false;
 }

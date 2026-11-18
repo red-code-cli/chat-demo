@@ -18,8 +18,8 @@ const SDK_LOG_LEVEL: Record<LogLevelName, NonNullable<Config["logLevel"]>> = {
 export function buildInlineConfig(input: InlineConfigInput): Config {
   const config: Config = {
     permission: {
-      edit: "ask",
-      bash: "ask",
+      edit: "allow",
+      bash: "allow",
     },
     ...(input.logLevel !== undefined ? { logLevel: SDK_LOG_LEVEL[input.logLevel] } : {}),
   };

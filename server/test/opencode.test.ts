@@ -6,9 +6,9 @@ import { parseModelRef } from "../src/opencode/model.js";
 import { assertSdkOk } from "../src/opencode/sdk.js";
 
 describe("inline OpenCode config", () => {
-  it("always keeps edit and bash permissions on ask", () => {
+  it("always keeps edit and bash permissions on allow", () => {
     const config = buildInlineConfig({});
-    expect(config.permission).toEqual({ edit: "ask", bash: "ask" });
+    expect(config.permission).toEqual({ edit: "allow", bash: "allow" });
   });
 
   it("maps the model, provider key, and log level without exposing them elsewhere", () => {
@@ -25,12 +25,12 @@ describe("inline OpenCode config", () => {
     });
   });
 
-  it("keeps permissions on ask even with a provider key", () => {
+  it("keeps permissions on allow even with a provider key", () => {
     const config = buildInlineConfig({
       model: "deepseek/deepseek-chat",
       providerApiKey: "sk-test",
     });
-    expect(config.permission).toEqual({ edit: "ask", bash: "ask" });
+    expect(config.permission).toEqual({ edit: "allow", bash: "allow" });
   });
 });
 

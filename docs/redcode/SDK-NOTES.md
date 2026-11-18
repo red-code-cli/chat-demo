@@ -45,7 +45,7 @@ const server = await createOpencodeServer({
   timeout: 20_000,
   config: {
     model: "deepseek/deepseek-chat",
-    permission: { edit: "ask", bash: "ask" },
+    permission: { edit: "allow", bash: "allow" },
     provider: { deepseek: { options: { apiKey: process.env.OPENCODE_PROVIDER_API_KEY } } },
   },
 });
@@ -201,11 +201,13 @@ The inline `Config` object accepts:
 }
 ```
 
-RedCode always sets `permission.edit` and `permission.bash` to `"ask"` in the
-embedded inline config. The provider id is the first segment of
-`OPENCODE_MODEL`; the rest is the model id. For a remote server the gateway reads
-`client.config.get()` and only checks the permission values; it does not log or
-return the config.
+RedCode sets `permission.edit` and `permission.bash` to `"allow"` in the
+embedded inline config so tool actions run without an interactive approval step.
+This is an explicit product decision requested for the local deployment; the
+permission-reply API remains available for remote/legacy flows. The provider id
+is the first segment of `OPENCODE_MODEL`; the rest is the model id. For a remote
+server the gateway reads `client.config.get()` and only checks the permission
+values; it does not log or return the config.
 
 ## Isolation requirements
 

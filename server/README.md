@@ -16,9 +16,11 @@ directly.
   config, credentials, MCP servers, or database.
 - Logs contain request metadata and error messages, never bearer tokens, provider
   keys, or prompt text.
-- `edit` and `bash` permissions are set to `ask` in the embedded inline config.
+- `edit` and `bash` permissions are set to `allow` in the embedded inline config.
   Remote mode verifies the remote permission policy and logs a warning when it is
-  not `ask`; the remote operator owns that config.
+  not `allow`; the remote operator owns that config. Running with `allow` means
+  tools execute without an approval prompt, so only point `WORKSPACE_ROOT` at a
+  directory you are willing to let the agent modify.
 
 ## Requirements
 
