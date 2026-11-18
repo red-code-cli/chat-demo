@@ -12,7 +12,10 @@
     "lint": "oxlint src rspack.config.ts",
     "format": "oxfmt --write .",
     "test:e2e": "playwright test tests/e2e",
-    "test:visual": "playwright test tests/visual"
+    "test:visual": "playwright test tests/visual",
+    "dev:server": "pnpm --filter @redcode/server dev",
+    "build:server": "pnpm --filter @redcode/server build",
+    "test:server": "pnpm --filter @redcode/server test"
   },
   "dependencies": {
     "@types/katex": "^0.16.5",
