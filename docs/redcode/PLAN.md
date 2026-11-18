@@ -57,9 +57,6 @@ Scope decisions (recorded during Phase 1):
       mutations require the same header, so they are CSRF-safe without cookies.
 - [x] API skeleton: `/health`, `/api/v1/meta`, `/api/v1/sessions*`, `/api/v1/events` SSE bridge;
       shared error envelope with `code`, `message`, and `requestId`.
-- [ ] Frontend integration behind a build/config flag; existing DeepSeek direct mode still
-      works until Phase 2 swaps the chat transport. **Deferred to Phase 2 because Phase 1 must
-      not change `src/`.**
 - [x] Server tests (Vitest route/unit tests with a mocked gateway) plus a manual smoke script for
       real OpenCode; no network mocks leaking to real providers and no smoke in CI.
 - [x] Docs: `server/README.md` runbook (env vars, start order, ports, troubleshooting),
@@ -79,6 +76,11 @@ Scope decisions (recorded during Phase 1):
 Goal: prompt, event stream, and interrupt run through OpenCode sessions while the chat UI
 feels identical to today.
 
+Phase 1 wires the backend only. Connecting the SPA to it is the first Phase 2 task:
+
+- [ ] Frontend integration behind a build/config flag: replace direct provider calls with
+      `/api/v1` fetch/streaming, keep existing DeepSeek direct mode working until the swap is
+      verified, and remove provider key storage from the browser. (`src/` was untouched in Phase 1.)
 - [ ] Session mapping: local chat/session IDs ↔ OpenCode session IDs, created lazily, with
       idempotent recovery after reload.
 - [ ] Prompt pipeline: send message, stream assistant text/thinking, usage and stop reason
